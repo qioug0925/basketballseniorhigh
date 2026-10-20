@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="2班街球">
+<title>2班街球模式 V0.7.3</title>
+
+<style>
+:root {
+  --bg: #101827;
+  --panel: #1b2638;
+  --panel2: #243248;
+  --text: #f3f6fc;
+  --muted: #aab7ca;
+  --blue: #58a6ff;
+  --orange: #ffab58;
+  --green: #55d6a0;
+  --red: #ff7373;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+button, select, input, textarea { font: inherit; }
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 15px;
+  color: white;
+  background: #34445e;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+button:active { transform: scale(.98); }
+button:disabled { opacity: .4; cursor: not-allowed; }
+.primary { background: #2678e8; }
+.success { background: #16845e; }
+.warning { background: #a9661f; }
+.danger { background: #a63e4c; }
+.small { padding: 8px 11px; font-size: 14px; }
+h1 { margin: 0; font-size: 23px; }
+h2 { margin: 0 0 12px; font-size: 19px; }
+h3 { margin: 0 0 8px; font-size: 16px; }
+p { margin: 7px 0; }
+.muted { color: var(--muted); font-size: 14px; }
+
+header {
+  padding: 18px 16px 14px;
+  background: #0c1320;
+  border-bottom: 1px solid #344157;
+}
+.header-row {
+  max-width: 1050px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+#saveStatus { color: var(--green); font-size: 12px; }
+main {
+  max-width: 1050px;
+  margin: auto;
+  padding: 16px;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom));
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid #344157;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 15px;
+}
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.row > button { flex: 1; min-width: 120px; }
+
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.player-card {
+  background: var(--panel2);
+  border: 2px solid transparent;
+  border-radius: 13px;
+  padding: 12px;
+  min-width: 0;
+  cursor: pointer;
+  position: relative;
+}
+.player-card.selected {
+  border-color: var(--green);
+  background: #203d3a;
+}
+.player-card.blue-team {
+  border-color: var(--blue);
+  background: #1a2c44;
+}
+.player-card.orange-team {
+  border-color: var(--orange);
+  background: #3d2d1a;
+}
+.player-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.player-name { font-weight: 700; overflow-wrap: anywhere; }
+.team-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.team-badge.b { background: #2678e8; color: white; }
+.team-badge.o { background: #d98425; color: white; }
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+.preview-team {
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--panel2);
+  min-height: 120px;
+}
+.preview-team.blue { border-top: 4px solid var(--blue); }
+.preview-team.orange { border-top: 4px solid var(--orange); }
+.preview-team-name {
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.preview-slot {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #1a2437;
+  margin-bottom: 6px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+.preview-slot.empty { color: var(--muted); font-style: italic; }
+.preview-slot .remove-btn {
+  background: transparent;
+  color: var(--red);
+  padding: 2px 6px;
+  font-size: 16px;
+  line-height: 1;
+  border-radius: 6px;
+}
+
+.bond-banner {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.bond-banner.b811 {
+  background: #2a2242;
+  color: #c9a8ff;
+  border: 1px solid #4a3a75;
+}
+.bond-banner.blone {
+  background: #3a2222;
+  color: #ff9d9d;
+  border: 1px solid #6b3535;
+}
+
+.side-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+.side-option {
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--panel2);
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+}
+.side-option.blue { border-top: 4px solid var(--blue); }
+.side-option.orange { border-top: 4px solid var(--orange); }
+.side-option.active.blue {
+  border-color: var(--blue);
+  background: #1a2c44;
+}
+.side-option.active.orange {
+  border-color: var(--orange);
+  background: #3d2d1a;
+}
+.side-option .side-title {
+  font-weight: 800;
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+.side-option .side-desc {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.team {
+  border-radius: 14px;
+  padding: 13px;
+  background: var(--panel2);
+}
+.team.blue { border-top: 4px solid var(--blue); }
+.team.orange { border-top: 4px solid var(--orange); }
+.team-name { font-weight: 800; margin-bottom: 8px; }
+.team-player {
+  padding: 7px 0;
+  border-bottom: 1px solid #3b4a61;
+  font-size: 14px;
+}
+.team-player:last-child { border-bottom: 0; }
+
+/* ===== 融合版记分板 ===== */
+.scoreboard {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #0c1320f5;
+  border: 1px solid #3b4a61;
+  border-radius: 16px;
+  padding: 13px 12px;
+  margin-bottom: 15px;
+  backdrop-filter: blur(12px);
+}
+.scoreline {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+}
+.score { font-size: 38px; line-height: 1.15; font-weight: 900; }
+.blue-text { color: var(--blue); }
+.orange-text { color: var(--orange); }
+.vs { color: var(--muted); font-size: 12px; }
+#possessionText {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* 记分板内嵌最新回合 */
+.scoreboard-latest {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #1a2437;
+  border-left: 3px solid var(--green);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--text);
+}
+.scoreboard-latest.oreb {
+  border-left-color: var(--orange);
+  background: #2a2216;
+}
+.scoreboard-latest.empty {
+  color: var(--muted);
+  font-weight: 400;
+  font-style: italic;
+  border-left-color: #3b4a61;
+}
+.scoreboard-latest .latest-prefix {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  margin-right: 4px;
+}
+
+/* 记分板内的历史记录折叠区 */
+.scoreboard-history {
+  margin-top: 8px;
+}
+.scoreboard-history summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 6px 2px;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.scoreboard-history summary::-webkit-details-marker { display: none; }
+.scoreboard-history summary::before {
+  content: "▸";
+  display: inline-block;
+  transition: transform .15s;
+  font-size: 10px;
+}
+.scoreboard-history[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.log {
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-top: 6px;
+  padding-right: 4px;
+}
+.log-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #344157;
+  font-size: 13px;
+  color: var(--muted);
+}
+.log-item:last-child { border-bottom: 0; }
+.log-item.oreb {
+  border-left: 3px solid var(--orange);
+  background: #2a2216;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border-bottom: 0;
+  color: #ffd9a8;
+}
+
+/* 操作按钮 */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.action-grid button { min-height: 54px; }
+.action-grid button.active {
+  outline: 2px solid var(--green);
+  background: #205542;
+}
+
+.hidden { display: none !important; }
+select {
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid #52627a;
+  border-radius: 10px;
+  padding: 11px;
+  width: 100%;
+}
+select:disabled { opacity: .5; }
+label.field {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.stat {
+  background: var(--panel2);
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+.stat strong { display: block; font-size: 20px; }
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 12px;
+}
+
+.ai-thinking {
+  text-align: center;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--orange);
+  background: #2a2216;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.ai-thinking .dot {
+  display: inline-block;
+  animation: blink 1.2s infinite;
+}
+.ai-thinking .dot:nth-child(2) { animation-delay: .2s; }
+.ai-thinking .dot:nth-child(3) { animation-delay: .4s; }
+@keyframes blink {
+  0%, 60%, 100% { opacity: .3; }
+  30% { opacity: 1; }
+}
+
+@media (max-width: 650px) {
+  header { padding: 14px 12px; }
+  h1 { font-size: 20px; }
+  main { padding: 11px; }
+  .panel { padding: 13px; border-radius: 14px; }
+  .player-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .player-card { padding: 10px; }
+  .preview-grid { gap: 8px; }
+  .preview-team { padding: 10px; }
+  .side-picker { gap: 8px; }
+  .side-option { padding: 12px 8px; }
+  .team-grid { gap: 8px; }
+  .team { padding: 10px; }
+  .score { font-size: 33px; }
+  .action-grid { gap: 8px; }
+  .action-grid button { min-height: 58px; padding: 12px 8px; }
+  .row > button { min-width: 100px; }
+  .log { max-height: 180px; }
+  .scoreboard-latest { font-size: 13px; padding: 9px 10px; }
+}
+@media (max-width: 360px) {
+  .player-grid { grid-template-columns: 1fr 1fr; }
+  .score { font-size: 28px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="header-row">
+    <div>
+      <h1>🏀 2班街球模式</h1>
+      <div class="muted">V0.7.3 · 3对3半场 · 先到21分 · 羁绊 · 进攻篮板 · AI对战</div>
+    </div>
+    <div style="text-align:right">
+      <div id="saveStatus">● 自动保存已开启</div>
+      <button class="small" onclick="showSaveTools()">存档工具</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="saveTools" class="panel hidden">
+    <h2>存档管理</h2>
+    <p class="muted">本设备会自动保存。导出存档后，可把文本复制到另一台设备，再使用导入功能。</p>
+    <div class="row">
+      <button class="primary" onclick="exportSave()">导出存档</button>
+      <button onclick="importSave()">导入存档</button>
+      <button class="danger" onclick="resetEverything()">重置全部数据</button>
+    </div>
+    <label class="field" for="saveText">存档文本</label>
+    <textarea id="saveText" rows="5"
+      placeholder="导出的存档会显示在这里；也可以在这里粘贴另一台设备的存档。"
+      style="width:100%;background:#101827;color:white;border:1px solid #52627a;border-radius:10px;padding:10px"></textarea>
+    <p class="muted">注意：导入存档会覆盖当前设备中的游戏进度。</p>
+  </section>
+
+  <section id="setupScreen">
+    <div class="panel">
+      <h2>第一步：选择球员与分队</h2>
+      <p class="muted">点击球员卡片分配到蓝队，再点一次切换橙队，第三次取消。最多选 6 人、每队 3 人。</p>
+      <div class="row" style="margin:12px 0">
+        <button class="primary" onclick="autoPick()">🎲 随机选人并平衡分队</button>
+        <button onclick="autoBalance()">⚖️ 保持选人，仅重新平衡分队</button>
+        <button onclick="clearSelection()">清空选择</button>
+      </div>
+      <p id="selectionCount">已选择 0/6 人</p>
+      <div id="playerGrid" class="player-grid"></div>
+    </div>
+
+    <div class="panel">
+      <h2>分队预览与羁绊</h2>
+      <p class="muted">下方实时显示当前分队。点击队员右侧 ✕ 可移出队伍。</p>
+      <div class="preview-grid">
+        <div class="preview-team blue">
+          <div class="preview-team-name blue-text">
+            <span>蓝队</span><span id="blueCount" class="muted">0/3</span>
+          </div>
+          <div id="bluePreview"></div>
+          <div id="blueBonds"></div>
+        </div>
+        <div class="preview-team orange">
+          <div class="preview-team-name orange-text">
+            <span>橙队</span><span id="orangeCount" class="muted">0/3</span>
+          </div>
+          <div id="orangePreview"></div>
+          <div id="orangeBonds"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>第三步：选择你控制的队伍</h2>
+      <p class="muted">你控制的队伍手动操作；另一队由电脑 AI 自动控制。</p>
+      <div class="side-picker">
+        <div id="pickBlue" class="side-option blue" onclick="setPlayerSide(0)">
+          <div class="side-title blue-text">我控制蓝队</div>
+          <div class="side-desc">橙队由 AI 控制</div>
+        </div>
+        <div id="pickOrange" class="side-option orange" onclick="setPlayerSide(1)">
+          <div class="side-title orange-text">我控制橙队</div>
+          <div class="side-desc">蓝队由 AI 控制</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>第四步：开始比赛</h2>
+      <div class="row">
+        <button class="success" onclick="startGame()">开始 / 确认分队</button>
+        <button onclick="resumeGame()">继续上次比赛</button>
+      </div>
+      <p class="muted">如果已有进行中的比赛，“继续上次比赛”会恢复最近一次自动存档。</p>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="hidden">
+
+    <!-- 记分板 + 最新回合融合块 -->
+    <div class="scoreboard">
+      <div class="scoreline">
+        <div>
+          <div class="blue-text">蓝队</div>
+          <div class="score blue-text" id="blueScore">0</div>
+        </div>
+        <div class="vs">先到21分<br>2分 / 3分</div>
+        <div>
+          <div class="orange-text">橙队</div>
+          <div class="score orange-text" id="orangeScore">0</div>
+        </div>
+      </div>
+      <div id="possessionText">比赛尚未开始</div>
+
+      <!-- 最新一条战况：醒目显示 -->
+      <div id="latestPlay" class="scoreboard-latest empty">等待比赛开始……</div>
+
+      <!-- 历史回合折叠 -->
+      <details class="scoreboard-history">
+        <summary>📋 查看历史回合</summary>
+        <div class="row" style="margin:8px 0">
+          <button class="small" onclick="undoLast()">撤销上一回合</button>
+          <button class="small" onclick="backToSetup()">返回选人界面</button>
+        </div>
+        <div id="log" class="log"></div>
+      </details>
+    </div>
+
+    <!-- 进攻选择 -->
+    <div class="panel">
+      <h2>进攻选择</h2>
+      <div id="aiThinking" class="ai-thinking hidden">
+        🤖 AI 思考中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+      </div>
+
+      <p id="controlHint" class="muted">选择当前进攻方式，再选择持球人的行动。队友跑位和防守结果由系统模拟。</p>
+      <label class="field" for="offenseStyle">进攻体系</label>
+      <select id="offenseStyle" onchange="saveGame()">
+        <option value="iso">单打：持球人主导，可在包夹时分球</option>
+        <option value="team">团队配合：更重视传球和空位</option>
+      </select>
+      <p id="bondNotice" class="muted hidden"></p>
+
+      <label class="field" for="attackerSelect">持球球员</label>
+      <select id="attackerSelect" onchange="saveGame()"></select>
+
+      <div id="actionButtons" class="action-grid" style="margin-top:12px">
+        <button class="primary" onclick="play('drive')">⚡ 突破上篮</button>
+        <button class="primary" onclick="play('mid')">🎯 中距离</button>
+        <button class="primary" onclick="play('three')">🔥 三分球</button>
+        <button onclick="play('pass')">🤝 传球寻找机会</button>
+        <button onclick="play('reset')">🔄 重新组织</button>
+        <button class="warning" onclick="play('post')">💪 内线强攻</button>
+      </div>
+    </div>
+
+    <!-- 防守策略 -->
+    <div class="panel">
+      <h2>防守策略</h2>
+      <p class="muted">防守策略会影响对手的命中率、失误率和进攻选择。</p>
+      <div class="action-grid">
+        <button id="def-normal" class="active" onclick="setDefense('normal')">🛡️ 正常防守</button>
+        <button id="def-pressure" onclick="setDefense('pressure')">👊 全场紧逼</button>
+        <button id="def-sag" onclick="setDefense('sag')">↔️ 收缩防守</button>
+        <button id="def-double" onclick="setDefense('double')">👥 夹击持球人</button>
+      </div>
+    </div>
+
+    <!-- 球员状态 -->
+    <div class="panel">
+      <h2>球员状态</h2>
+      <div id="statsDisplay" class="stat-grid"></div>
+    </div>
+
+    <!-- 阵容名单（最下方） -->
+    <div id="teamsDisplay" class="team-grid panel"></div>
+  </section>
+
+  <section id="resultScreen" class="panel hidden">
+    <h2>🏆 比赛结束</h2>
+    <div id="resultText"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="primary" onclick="newMatch()">再打一场</button>
+      <button onclick="backToSetup()">返回选人</button>
+    </div>
+  </section>
+</main>
+
+<footer>2班街球模式 · 本地自动存档 · 训练赛模拟版</footer>
+
+<script>
+const STORAGE_KEY = "class2_streetball_v02";
+
+const BOND_811_IDS = [1,2,3,4,5,8];
+const BOND_LONE_IDS = [7,11];
+
+const roster = [
+  {id:1,name:"邱翊洋",shot:3,drive:2,dribble:2,defense:2,stamina:3,pass:3,rebound:3,vertical:2,height:174,style:"均衡型"},
+  {id:2,name:"张资浩",shot:4,drive:5,dribble:4,defense:5,stamina:5,pass:4,rebound:4,vertical:4,height:178,style:"突破无解"},
+  {id:3,name:"王迈",shot:4,drive:3,dribble:4,defense:3,stamina:2,pass:3,rebound:2,vertical:2,height:175,style:"节奏型打法"},
+  {id:4,name:"郑植腾",shot:1,drive:3,dribble:1,defense:5,stamina:4,pass:1,rebound:5,vertical:5,height:186,style:"吃饼型、弹跳好"},
+  {id:5,name:"林润贤",shot:3,drive:2,dribble:2,defense:3,stamina:3,pass:2,rebound:3,vertical:3,height:180,style:"均衡型"},
+  {id:6,name:"田博文",shot:4,drive:4,dribble:4,defense:1,stamina:3,pass:4,rebound:3,vertical:3,height:177,style:"速度快、爱投三分"},
+  {id:7,name:"黄文逸",shot:4,drive:4,dribble:2,defense:4,stamina:4,pass:1,rebound:4,vertical:5,height:178,style:"爱投三分、不爱传球"},
+  {id:8,name:"郭丰铭",shot:1,drive:1,dribble:1,defense:3,stamina:2,pass:3,rebound:1,vertical:1,height:185,style:"移动较慢"},
+  {id:9,name:"黄嘉豪",shot:3,drive:4,dribble:2,defense:4,stamina:2,pass:2,rebound:4,vertical:4,height:183,style:"中投、长臂展"},
+  {id:10,name:"毛楚舒",shot:3,drive:2,dribble:2,defense:3,stamina:3,pass:2,rebound:5,vertical:3,height:180,style:"篮板能力强"},
+  {id:11,name:"邓润博",shot:3,drive:3,dribble:4,defense:1,stamina:3,pass:1,rebound:2,vertical:2,height:174,style:"喜欢运球、不爱传球"},
+  {id:12,name:"石政",shot:2,drive:3,dribble:3,defense:2,stamina:3,pass:3,rebound:3,vertical:3,height:175,style:"暂未设定"}
+];
+
+const defaults = {
+  selected: [],
+  teams: [[],[]],
+  playerSide: 0,
+  game: null,
+  logs: [],
+  lastGame: null
+};
+
+let state = loadGameState();
+let undoState = null;
+let saveTimer = null;
+let aiTimer = null;
+let aiRunning = false;
+
+function freshPlayer(p) {
+  return {
+    ...p,
+    energy:100,
+    points:0,
+    rebounds:0,
+    oRebounds:0,
+    assists:0,
+    turnovers:0
+  };
+}
+
+function loadGameState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(defaults);
+    const data = JSON.parse(raw);
+    const s = {...structuredClone(defaults), ...data};
+    if (!Array.isArray(s.teams) || s.teams.length !== 2) s.teams = [[],[]];
+    if (s.playerSide !== 0 && s.playerSide !== 1) s.playerSide = 0;
+    if (s.game && s.game.players) {
+      Object.values(s.game.players).forEach(p => {
+        if (typeof p.oRebounds !== "number") p.oRebounds = 0;
+      });
+    }
+    return s;
+  } catch(e) {
+    return structuredClone(defaults);
+  }
+}
+
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    document.getElementById("saveStatus").textContent = "● 已自动保存";
+  } catch(e) {
+    document.getElementById("saveStatus").textContent = "保存失败";
+  }
+}
+
+function saveGame() {
+  clearTimeout(saveTimer);
+  document.getElementById("saveStatus").textContent = "正在保存…";
+  saveTimer = setTimeout(persist, 150);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1;i>0;i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ===== 羁绊判定 ===== */
+function has811Bond(ids) {
+  const count = ids.filter(id => BOND_811_IDS.includes(id)).length;
+  return count >= 3;
+}
+function hasLoneBond(ids) {
+  return ids.includes(7) && ids.includes(11);
+}
+function isForcedIso(teamIndex) {
+  if (!state.teams || !state.teams[teamIndex]) return false;
+  return hasLoneBond(state.teams[teamIndex]);
+}
+function teamBonds(ids) {
+  const list = [];
+  if (has811Bond(ids)) {
+    list.push({ key:"811", cls:"b811", text:"🔥 811羁绊：全队命中率提升、体力消耗降低" });
+  }
+  if (hasLoneBond(ids)) {
+    list.push({ key:"lone", cls:"blone", text:"🐺 独狼羁绊：取消团队配合，只能单打且两人互不传球" });
+  }
+  return list;
+}
+function teamBondHitBonus(ids) {
+  return has811Bond(ids) ? 0.05 : 0;
+}
+function teamBondEnergyFactor(ids) {
+  return has811Bond(ids) ? 0.75 : 1;
+}
+function isLoneBlockedPass(passerId, receiverId) {
+  if (!BOND_LONE_IDS.includes(passerId)) return false;
+  if (!BOND_LONE_IDS.includes(receiverId)) return false;
+  return true;
+}
+
+/* ===== 选人与分队 ===== */
+function teamOf(id) {
+  if (state.teams[0].includes(id)) return 0;
+  if (state.teams[1].includes(id)) return 1;
+  return -1;
+}
+function assignToTeam(id, teamIndex) {
+  const other = 1 - teamIndex;
+  state.teams[other] = state.teams[other].filter(x => x !== id);
+  if (state.teams[teamIndex].includes(id)) return true;
+  if (state.teams[teamIndex].length >= 3) return false;
+  state.teams[teamIndex].push(id);
+  return true;
+}
+function removeFromTeams(id) {
+  state.teams[0] = state.teams[0].filter(x => x !== id);
+  state.teams[1] = state.teams[1].filter(x => x !== id);
+}
+function cycleAssign(id) {
+  const t = teamOf(id);
+  if (t === -1) {
+    if (state.teams[0].length < 3) assignToTeam(id, 0);
+    else if (state.teams[1].length < 3) assignToTeam(id, 1);
+    else alert("两队都已满，请先移除一名球员。");
+  } else if (t === 0) {
+    if (state.teams[1].length >= 3) { alert("橙队已满，请先移除一名球员。"); return; }
+    assignToTeam(id, 1);
+  } else {
+    removeFromTeams(id);
+  }
+  syncSelected();
+}
+function syncSelected() {
+  state.selected = [...state.teams[0], ...state.teams[1]];
+}
+function setPlayerSide(side) {
+  state.playerSide = side;
+  document.getElementById("pickBlue").classList.toggle("active", side===0);
+  document.getElementById("pickOrange").classList.toggle("active", side===1);
+  saveGame();
+}
+function renderSidePicker() {
+  document.getElementById("pickBlue").classList.toggle("active", state.playerSide===0);
+  document.getElementById("pickOrange").classList.toggle("active", state.playerSide===1);
+}
+function renderRoster() {
+  const grid = document.getElementById("playerGrid");
+  grid.innerHTML = "";
+  roster.forEach(p => {
+    const t = teamOf(p.id);
+    let cls = "player-card";
+    if (t === 0) cls += " blue-team";
+    else if (t === 1) cls += " orange-team";
+    const card = document.createElement("div");
+    card.className = cls;
+    let badge = "";
+    if (t === 0) badge = `<span class="team-badge b">蓝队</span>`;
+    else if (t === 1) badge = `<span class="team-badge o">橙队</span>`;
+    card.innerHTML = `
+      <div class="player-top">
+        <span class="player-name">${p.name}</span>
+      </div>
+      ${badge}`;
+    card.onclick = () => {
+      cycleAssign(p.id);
+      saveGame();
+      renderRoster();
+      renderPreview();
+    };
+    grid.appendChild(card);
+  });
+  updateSelectionCount();
+}
+function updateSelectionCount() {
+  const total = state.teams[0].length + state.teams[1].length;
+  document.getElementById("selectionCount").textContent =
+    `已选择 ${total}/6 人 · 蓝队 ${state.teams[0].length}/3 · 橙队 ${state.teams[1].length}/3`;
+}
+function renderPreview() {
+  [0,1].forEach(ti => {
+    const ids = state.teams[ti];
+    const root = document.getElementById(ti===0 ? "bluePreview" : "orangePreview");
+    const bondsRoot = document.getElementById(ti===0 ? "blueBonds" : "orangeBonds");
+    const countRoot = document.getElementById(ti===0 ? "blueCount" : "orangeCount");
+    countRoot.textContent = `${ids.length}/3`;
+    root.innerHTML = "";
+    for (let i=0;i<3;i++) {
+      const id = ids[i];
+      const slot = document.createElement("div");
+      if (id == null) {
+        slot.className = "preview-slot empty";
+        slot.textContent = `空位 ${i+1}`;
+      } else {
+        const p = playerById(id);
+        slot.className = "preview-slot";
+        slot.innerHTML = `<span>${p.name}</span><button class="remove-btn" title="移出">✕</button>`;
+        slot.querySelector(".remove-btn").onclick = (ev) => {
+          ev.stopPropagation();
+          removeFromTeams(id);
+          syncSelected();
+          saveGame();
+          renderRoster();
+          renderPreview();
+        };
+      }
+      root.appendChild(slot);
+    }
+    const bonds = teamBonds(ids);
+    bondsRoot.innerHTML = bonds.map(b =>
+      `<div class="bond-banner ${b.cls}">${b.text}</div>`
+    ).join("");
+  });
+}
+function clearSelection() {
+  state.selected = [];
+  state.teams = [[],[]];
+  saveGame();
+  renderRoster();
+  renderPreview();
+}
+function playerById(id) {
+  return roster.find(p => p.id === id);
+}
+function autoPick() {
+  const ids = shuffle(roster.map(p => p.id)).slice(0,6);
+  const best = pickBalanced(ids);
+  state.teams = [best[0], best[1]];
+  syncSelected();
+  saveGame();
+  renderRoster();
+  renderPreview();
+  alert("已随机选出6人并完成分队。可点击球员卡片调整，或点击“开始 / 确认分队”。");
+}
+function autoBalance() {
+  const ids = [...state.teams[0], ...state.teams[1]];
+  if (ids.length !== 6) {
+    alert("请先选满 6 人再重新平衡分队。");
+    return;
+  }
+  const best = pickBalanced(ids);
+  state.teams = [best[0], best[1]];
+  syncSelected();
+  saveGame();
+  renderRoster();
+  renderPreview();
+}
+function teamStrength(ids) {
+  return ids.reduce((sum,id) => {
+    const p = playerById(id);
+    return sum + p.shot*1.1 + p.drive + p.dribble*.55 +
+      p.defense*.65 + p.stamina*.35 + p.pass*.3 +
+      p.rebound*.35 + p.vertical*.2;
+  },0);
+}
+function pickBalanced(ids) {
+  let best = [ids.slice(0,3), ids.slice(3)];
+  let bestDiff = Infinity;
+  for (let i=0;i<200;i++) {
+    const arr = shuffle(ids);
+    const a = arr.slice(0,3);
+    const b = arr.slice(3);
+    const d = Math.abs(teamStrength(a) - teamStrength(b));
+    const adjusted = d + Math.random()*1.6;
+    if (adjusted < bestDiff) {
+      bestDiff = adjusted;
+      best = [a,b];
+    }
+  }
+  return best;
+}
+
+function startGame() {
+  const total = state.teams[0].length + state.teams[1].length;
+  if (state.teams[0].length !== 3 || state.teams[1].length !== 3) {
+    alert("请确保蓝队和橙队各 3 人再开始比赛。");
+    return;
+  }
+  if (total !== 6) {
+    alert("请选择 6 名球员。");
+    return;
+  }
+
+  const players = {};
+  syncSelected();
+  state.selected.forEach(id => {
+    players[id] = freshPlayer(playerById(id));
+  });
+
+  state.game = {
+    blue:0,
+    orange:0,
+    offense:Math.random()<.5 ? 0 : 1,
+    turn:1,
+    defense:"normal",
+    over:false,
+    players,
+    startedAt:new Date().toISOString()
+  };
+
+  state.logs = [];
+  undoState = null;
+
+  addLog("比赛开始！双方各3人，先到21分获胜。");
+
+  const playerTeamName = state.playerSide === 0 ? "蓝队" : "橙队";
+  const aiTeamName = state.playerSide === 0 ? "橙队" : "蓝队";
+  addLog(`你控制${playerTeamName}，${aiTeamName}由 AI 控制。`);
+
+  [0,1].forEach(ti => {
+    const name = ti===0 ? "蓝队" : "橙队";
+    teamBonds(state.teams[ti]).forEach(b => {
+      addLog(`${name}触发 ${b.text}`);
+    });
+  });
+
+  showGame();
+  saveGame();
+}
+
+function resumeGame() {
+  if (!state.game) {
+    alert("还没有找到已保存的比赛。请先开始一场比赛。");
+    return;
+  }
+  if (state.game.over) showResult();
+  else showGame();
+}
+
+function showGame() {
+  document.getElementById("setupScreen").classList.add("hidden");
+  document.getElementById("gameScreen").classList.remove("hidden");
+  document.getElementById("resultScreen").classList.add("hidden");
+  renderTeams();
+  renderAttackerOptions();
+  renderGame();
+  setTimeout(maybeRunAI, 100);
+}
+
+function backToSetup() {
+  clearTimeout(aiTimer);
+  aiRunning = false;
+  document.getElementById("setupScreen").classList.remove("hidden");
+  document.getElementById("gameScreen").classList.add("hidden");
+  document.getElementById("resultScreen").classList.add("hidden");
+  renderRoster();
+  renderPreview();
+  renderSidePicker();
+}
+
+function renderTeams() {
+  const root = document.getElementById("teamsDisplay");
+  root.innerHTML = "";
+  [0,1].forEach(teamIndex => {
+    const div = document.createElement("div");
+    div.className = "team " + (teamIndex===0 ? "blue" : "orange");
+    const ids = state.teams[teamIndex];
+    const bonds = teamBonds(ids);
+    const isPlayer = teamIndex === state.playerSide;
+    let html = `<div class="team-name ${teamIndex===0 ? "blue-text" : "orange-text"}">${teamIndex===0 ? "蓝队" : "橙队"} ${isPlayer ? "（你）" : "🤖 AI"}</div>`;
+    html += ids.map(id => {
+      const p = playerById(id);
+      return `<div class="team-player">${p.name}</div>`;
+    }).join("");
+    bonds.forEach(b => {
+      html += `<div class="bond-banner ${b.cls}">${b.text}</div>`;
+    });
+    div.innerHTML = html;
+    root.appendChild(div);
+  });
+}
+
+function renderAttackerOptions() {
+  const select = document.getElementById("attackerSelect");
+  const old = Number(select.value);
+  const offense = state.game.offense;
+  const ids = state.teams[offense];
+  select.innerHTML = ids.map(id => {
+    const p = state.game.players[id];
+    return `<option value="${id}">${playerById(id).name}（体力${Math.round(p.energy)}%）</option>`;
+  }).join("");
+  if (ids.includes(old)) select.value = String(old);
+}
+
+function renderGame() {
+  const g = state.game;
+
+  document.getElementById("blueScore").textContent = g.blue;
+  document.getElementById("orangeScore").textContent = g.orange;
+
+  const team = g.offense===0 ? "蓝队" : "橙队";
+  const isPlayerTurn = g.offense === state.playerSide;
+
+  document.getElementById("possessionText").textContent =
+    g.over ? "比赛已结束" : `第${g.turn}回合 · ${team}进攻`;
+
+  // 最新回合播报
+  const latestRoot = document.getElementById("latestPlay");
+  const lastLog = state.logs.length ? state.logs[state.logs.length - 1] : null;
+  if (lastLog) {
+    const prefix = lastLog.prefix || "";
+    const entry = lastLog.entry;
+    const isOreb = typeof entry === "object" && entry.type === "oreb";
+    const text = typeof entry === "object" ? entry.text : entry;
+    latestRoot.className = "scoreboard-latest" + (isOreb ? " oreb" : "");
+    latestRoot.innerHTML = `<span class="latest-prefix">${escapeHtml(prefix)}</span>${escapeHtml(text)}`;
+  } else {
+    latestRoot.className = "scoreboard-latest empty";
+    latestRoot.textContent = "等待比赛开始……";
+  }
+
+  const hint = document.getElementById("controlHint");
+  const aiThinking = document.getElementById("aiThinking");
+  const playerCanAct = isPlayerTurn && !g.over && !aiRunning;
+
+  if (g.over) {
+    hint.textContent = "";
+    aiThinking.classList.add("hidden");
+  } else if (playerCanAct) {
+    hint.textContent = "轮到你了，选择进攻动作。";
+    aiThinking.classList.add("hidden");
+  } else {
+    hint.textContent = "AI 正在操作对方队伍……";
+    aiThinking.classList.remove("hidden");
+  }
+
+  const forcedIso = isForcedIso(g.offense);
+  const styleSelect = document.getElementById("offenseStyle");
+  const notice = document.getElementById("bondNotice");
+
+  if (forcedIso) {
+    styleSelect.value = "iso";
+    notice.classList.remove("hidden");
+    notice.innerHTML = "🐺 独狼羁绊生效：本队进攻只能单打，且 7 号与 11 号之间不会互相传球。";
+  } else {
+    notice.classList.add("hidden");
+    notice.textContent = "";
+  }
+
+  ["normal","pressure","sag","double"].forEach(k => {
+    document.getElementById("def-"+k).classList.toggle("active", g.defense===k);
+  });
+
+  renderAttackerOptions();
+
+  const stats = document.getElementById("statsDisplay");
+  stats.innerHTML = state.teams.flat().map(id => {
+    const p = g.players[id];
+    const base = playerById(id);
+    return `<div class="stat"><strong>${Math.round(p.energy)}%</strong><span>${base.name}</span><div class="muted">体力</div></div>`;
+  }).join("");
+
+  // 历史回合：只显示除了最新一条以外的
+  const logRoot = document.getElementById("log");
+  const history = state.logs.slice(0, -1).reverse();
+  if (history.length === 0) {
+    logRoot.innerHTML = `<div class="log-item" style="color:var(--muted)">暂无更多历史回合</div>`;
+  } else {
+    logRoot.innerHTML = history.map(item => {
+      let cls = "log-item";
+      const prefix = item.prefix || "";
+      const entry = item.entry;
+      const isOreb = typeof entry === "object" && entry.type === "oreb";
+      if (isOreb) cls += " oreb";
+      const text = typeof entry === "object" ? entry.text : entry;
+      return `<div class="${cls}">${escapeHtml(prefix + text)}</div>`;
+    }).join("");
+  }
+
+  document.querySelectorAll("#gameScreen button").forEach(btn => {
+    if (btn.id.startsWith("def-")) {
+      btn.disabled = !playerCanAct;
+    } else if (btn.getAttribute("onclick")?.startsWith("play(")) {
+      btn.disabled = !playerCanAct;
+    }
+  });
+  styleSelect.disabled = !playerCanAct || forcedIso;
+  document.getElementById("attackerSelect").disabled = !playerCanAct;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g,c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  }[c]));
+}
+
+function addLog(text, type) {
+  const entry = type ? { text, type } : text;
+  state.logs.push({
+    prefix: `回合${state.game ? state.game.turn : 0}：`,
+    entry
+  });
+  if (state.logs.length > 150) state.logs.shift();
+}
+
+function setDefense(style) {
+  if (!state.game || state.game.over) return;
+  if (state.game.offense === state.playerSide) return;
+  state.game.defense = style;
+  const names = { normal:"正常防守", pressure:"紧逼防守", sag:"收缩防守", double:"夹击" };
+  addLog("防守策略调整为："+names[style]+"。");
+  renderGame();
+  saveGame();
+}
+
+function clamp(n,min,max) { return Math.max(min,Math.min(max,n)); }
+function fatigueFactor(p) { return .65 + .35*(p.energy/100); }
+function rand(min,max) { return Math.random()*(max-min)+min; }
+
+function bestDefender(teamIndex) {
+  return state.teams[teamIndex].map(id => state.game.players[id])
+    .sort((a,b) => (b.defense+b.energy/30)-(a.defense+a.energy/30))[0];
+}
+
+function teamReboundWeight(teamIndex) {
+  const ids = state.teams[teamIndex];
+  return ids.reduce((sum, id) => {
+    const p = state.game.players[id];
+    const base = playerById(id);
+    const w = base.rebound + base.height/60 + base.vertical*0.25 + p.energy/100;
+    return sum + Math.max(0.4, w);
+  }, 0);
+}
+
+function topRebounder(teamIndex) {
+  const ids = state.teams[teamIndex];
+  return ids.map(id => state.game.players[id]).sort((a,b) => {
+    const pa = playerById(a.id);
+    const pb = playerById(b.id);
+    const va = pa.rebound + pa.height/60 + pa.vertical*0.25 + a.energy/100;
+    const vb = pb.rebound + pb.height/60 + pb.vertical*0.25 + b.energy/100;
+    return vb - va;
+  })[0];
+}
+
+function resolveRebound(attackTeam, defendTeam) {
+  const defense = state.game.defense;
+  let offRebBase = 0.28;
+  if (defense === "sag") offRebBase -= 0.10;
+  if (defense === "double") offRebBase += 0.08;
+  if (defense === "pressure") offRebBase += 0.03;
+  const offW = teamReboundWeight(attackTeam);
+  const defW = teamReboundWeight(defendTeam);
+  const ratio = offW / (offW + defW);
+  offRebBase += (ratio - 0.5) * 0.4;
+  offRebBase = clamp(offRebBase, 0.12, 0.45);
+  const isOffReb = Math.random() < offRebBase;
+  if (isOffReb) {
+    const player = topRebounder(attackTeam);
+    return { teamIndex: attackTeam, player, isOffReb: true };
+  } else {
+    const player = topRebounder(defendTeam);
+    return { teamIndex: defendTeam, player, isOffReb: false };
+  }
+}
+
+function executePlay(action, style) {
+  const g = state.game;
+  if (!g || g.over) return false;
+
+  const attackTeam = g.offense;
+  const defendTeam = 1-attackTeam;
+  const attackerId = Number(document.getElementById("attackerSelect").value);
+  const attacker = g.players[attackerId];
+  const base = playerById(attackerId);
+  const teamIds = state.teams[attackTeam];
+
+  const attackBonds = {
+    has811:has811Bond(teamIds),
+    forcedIso:isForcedIso(attackTeam)
+  };
+
+  const teammates = teamIds.filter(id => id!==attackerId).map(id => g.players[id]);
+  if (attackBonds.forcedIso) style = "iso";
+
+  const defense = g.defense;
+  const defender = bestDefender(defendTeam);
+  const dfBase = playerById(defender.id);
+
+  let narration = "", points = 0, made = false, turnover = false, shotType = "";
+
+  const energyFactor = teamBondEnergyFactor(teamIds);
+  const cost = {drive:11,mid:8,three:8,pass:6,reset:4,post:12}[action] || 7;
+
+  attacker.energy = clamp(attacker.energy-cost*energyFactor,8,100);
+  teammates.forEach(p => {
+    p.energy = clamp(p.energy-(action==="reset" ? 2 : 4)*energyFactor,8,100);
+  });
+  state.teams[defendTeam].forEach(id => {
+    g.players[id].energy = clamp(g.players[id].energy-3,8,100);
+  });
+
+  const fatigue = fatigueFactor(attacker);
+  const defensePenalty = {
+    normal:0,
+    pressure:action==="drive" ? .07 : .025,
+    sag:action==="three" ? -.08 : .035,
+    double:action==="pass" || action==="reset" ? -.05 : .13
+  }[defense] || 0;
+
+  const bondHitBonus = teamBondHitBonus(teamIds);
+
+  if (action==="reset") {
+    const recovery = teammates.slice().sort((a,b) => b.pass-a.pass)[0];
+    if (recovery) recovery.energy = clamp(recovery.energy+4,0,100);
+    attacker.energy = clamp(attacker.energy+5,0,100);
+    narration = `${base.name}示意队友重新拉开空间，蓝领队友调整站位，${base.name}恢复了一点体力。`;
+    if (Math.random()<.12) {
+      turnover = true;
+      narration += `但传球线路出现问题，${dfBase.name}抢断成功！`;
+    }
+  } else if (action==="pass") {
+    let candidates = teammates.slice();
+    if (attackBonds.forcedIso) {
+      candidates = candidates.filter(p => !isLoneBlockedPass(base.id,p.id));
+    }
+    if (candidates.length===0) {
+      narration = `${base.name}想要传球，但队友之间没有配合意愿，只能自己强攻！`;
+      const chance = clamp(
+        .15+base.shot*.105*fatigue+bondHitBonus-defensePenalty-rand(0,.13),
+        .06,.82
+      );
+      made = Math.random()<chance;
+      points = 2;
+      shotType = "被迫单打";
+      if (made) {
+        attacker.points += 2;
+        narration += `${base.name}强投命中，得到2分！`;
+      } else {
+        narration += `${base.name}强投不中。`;
+      }
+    } else {
+      const receiver = candidates.slice().sort((a,b) => {
+        const pa = playerById(a.id);
+        const pb = playerById(b.id);
+        const scoreA = pa.shot+pa.pass*.25+Math.random()*2;
+        const scoreB = pb.shot+pb.pass*.25+Math.random()*2;
+        return scoreB-scoreA;
+      })[0];
+      const recBase = playerById(receiver.id);
+      const quality = clamp(
+        .36+recBase.shot*.045+recBase.pass*.025+
+        (style==="team" ? .08 : 0)+bondHitBonus-defensePenalty-rand(0,.18),
+        .08,.78
+      );
+      if (Math.random()<quality) {
+        const threeChance = recBase.shot>=4 ? .45 : .25;
+        points = Math.random()<threeChance ? 3 : 2;
+        const hitChance = clamp(
+          .22+recBase.shot*.095+receiver.energy/500+
+          bondHitBonus-defensePenalty+(style==="team" ? .07 : 0),
+          .2,.78
+        );
+        made = Math.random()<hitChance;
+        shotType = points===3 ? "空位三分" : "接球终结";
+        narration = `${base.name}分球给${recBase.name}，队友跑位创造机会。`;
+        if (made) {
+          receiver.points += points;
+          receiver.assists += 1;
+          narration += `${recBase.name}${shotType}命中，得到${points}分！`;
+        } else {
+          narration += `${recBase.name}${shotType}没能命中。`;
+        }
+      } else {
+        turnover = true;
+        attacker.turnovers += 1;
+        narration = `${base.name}尝试传球，但${dfBase.name}判断准确，完成抢断！`;
+      }
+    }
+  } else {
+    let skill = 0, label = "";
+    if (action==="drive") { skill = base.drive*.62+base.dribble*.38; label = "突破上篮"; }
+    if (action==="mid")   { skill = base.shot; label = "中距离投篮"; }
+    if (action==="three") { skill = base.shot*.85+base.dribble*.15; label = "三分球"; }
+    if (action==="post")  { skill = base.drive*.3+base.rebound*.35+base.height/40; label = "内线强攻"; }
+
+    const isThree = action==="three";
+    points = isThree ? 3 : 2;
+
+    const styleBonus =
+      (base.id===2 && action==="drive") ? .09 :
+      (base.id===6 && action==="drive") ? .05 :
+      (base.id===7 && action==="three") ? .07 :
+      (base.id===9 && action==="mid") ? .06 :
+      (base.id===4 && action==="post") ? -.08 : 0;
+
+    const teamBonus = style==="team" ? .035 : 0;
+    const blockRisk = action==="drive" || action==="post"
+      ? (dfBase.vertical+dfBase.defense)*.012 : 0;
+
+    let chance = .15+skill*.105*fatigue+teamBonus+styleBonus+
+      bondHitBonus-defensePenalty-blockRisk-rand(0,.13);
+
+    if (action==="three") chance -= .08;
+    if (action==="post") chance += .02;
+    chance = clamp(chance,.06,.82);
+
+    const turnoverChance = clamp(
+      .045+(defense==="pressure" ? .07 : 0)+
+      (defense==="double" ? .12 : 0)+
+      (base.dribble<=1 ? .04 : 0),
+      .03,.32
+    );
+
+    if (Math.random()<turnoverChance) {
+      turnover = true;
+      attacker.turnovers += 1;
+      narration = `${base.name}尝试${label}，但${dfBase.name}压迫到位，进攻失误！`;
+    } else {
+      made = Math.random()<chance;
+      shotType = label;
+      if (made) {
+        attacker.points += points;
+        narration = `${base.name}发动${label}，晃开防守后命中，得到${points}分！`;
+      } else {
+        narration = `${base.name}选择${label}，${dfBase.name}干扰成功，投篮偏出。`;
+      }
+    }
+  }
+
+  if (made) {
+    if (attackTeam===0) g.blue += points;
+    else g.orange += points;
+  }
+
+  if (turnover) {
+    g.offense = defendTeam;
+    addLog(narration);
+  } else if (!made) {
+    const reb = resolveRebound(attackTeam, defendTeam);
+    const rebBase = playerById(reb.player.id);
+    if (reb.isOffReb) {
+      reb.player.oRebounds = (reb.player.oRebounds || 0) + 1;
+      reb.player.rebounds += 1;
+      addLog(`${narration} ${rebBase.name}抢下进攻篮板，二次进攻机会！`, "oreb");
+    } else {
+      reb.player.rebounds += 1;
+      narration += ` ${rebBase.name}抢下防守篮板。`;
+      g.offense = defendTeam;
+      addLog(narration);
+    }
+  } else {
+    g.offense = defendTeam;
+    addLog(narration);
+  }
+
+  Object.values(g.players).forEach(p => {
+    p.energy = clamp(p.energy+1,0,100);
+  });
+
+  g.turn++;
+  checkWinner();
+  return true;
+}
+
+function play(action) {
+  const g = state.game;
+  if (!g || g.over) return;
+  if (g.offense !== state.playerSide) return;
+  if (aiRunning) return;
+
+  undoState = JSON.parse(JSON.stringify(state));
+  let style = document.getElementById("offenseStyle").value;
+  executePlay(action, style);
+  renderGame();
+  saveGame();
+
+  if (!state.game.over && state.game.offense !== state.playerSide) {
+    maybeRunAI();
+  }
+}
+
+function aiChooseAction() {
+  const g = state.game;
+  const attackTeam = g.offense;
+  const teamIds = state.teams[attackTeam];
+  const style = isForcedIso(attackTeam) ? "iso" : "team";
+
+  const attackerId = teamIds.slice().sort((a,b) => {
+    const pa = g.players[a], pb = g.players[b];
+    const ba = playerById(a), bb = playerById(b);
+    const sa = (ba.shot + ba.drive)*1.0 + pa.energy/40 + Math.random()*2.5;
+    const sb = (bb.shot + bb.drive)*1.0 + pb.energy/40 + Math.random()*2.5;
+    return sb - sa;
+  })[0];
+  document.getElementById("attackerSelect").value = String(attackerId);
+
+  const base = playerById(attackerId);
+  const defense = g.defense;
+  const energy = g.players[attackerId].energy;
+
+  const options = [];
+  const addOption = (action, weight) => {
+    if (weight > 0) options.push({ action, weight });
+  };
+
+  let driveW = base.drive * 1.0;
+  if (base.id === 2) driveW += 2.5;
+  if (base.id === 6) driveW += 1.5;
+  if (defense === "sag") driveW += 1.5;
+  addOption("drive", driveW);
+
+  let midW = base.shot * 0.85;
+  if (base.id === 9) midW += 2;
+  addOption("mid", midW);
+
+  let threeW = 0;
+  if (base.shot >= 3) threeW = (base.shot - 2) * 1.4;
+  if (base.id === 6 || base.id === 7) threeW += 2;
+  if (defense === "sag") threeW -= 1.2;
+  addOption("three", threeW);
+
+  let postW = 0;
+  if (base.rebound >= 4) postW = base.rebound * 0.8;
+  if (base.height >= 183) postW += 1.5;
+  if (base.id === 4) postW -= 1.5;
+  addOption("post", postW);
+
+  let passW = base.pass * 0.6;
+  if (style === "team") passW += 1.5;
+  if (isForcedIso(attackTeam)) passW = 0;
+  addOption("pass", passW);
+
+  if (energy < 45) addOption("reset", (50 - energy) * 0.1);
+
+  const totalW = options.reduce((s,o) => s + o.weight, 0);
+  let r = Math.random() * totalW;
+  let chosen = options[0]?.action || "drive";
+  for (const o of options) {
+    r -= o.weight;
+    if (r <= 0) { chosen = o.action; break; }
+  }
+
+  return { action: chosen, style };
+}
+
+function aiChooseDefense() {
+  const g = state.game;
+  const defenseTeam = 1 - state.playerSide;
+  const aiScore = defenseTeam===0 ? g.blue : g.orange;
+  const playerScore = defenseTeam===0 ? g.orange : g.blue;
+  const diff = aiScore - playerScore;
+  let choices;
+  if (diff <= -4) choices = ["pressure","pressure","double","normal"];
+  else if (diff >= 6) choices = ["sag","sag","normal","normal"];
+  else choices = ["normal","normal","normal","sag","pressure","double"];
+  g.defense = choices[Math.floor(Math.random()*choices.length)];
+}
+
+function maybeRunAI() {
+  const g = state.game;
+  if (!g || g.over) return;
+  if (g.offense === state.playerSide) {
+    aiRunning = false;
+    renderGame();
+    return;
+  }
+  if (aiRunning) return;
+
+  aiRunning = true;
+  renderGame();
+
+  clearTimeout(aiTimer);
+  aiTimer = setTimeout(() => {
+    const current = state.game;
+    if (!current || current.over) {
+      aiRunning = false;
+      renderGame();
+      return;
+    }
+    if (current.offense === state.playerSide) {
+      aiRunning = false;
+      renderGame();
+      return;
+    }
+
+    aiChooseDefense();
+    const { action, style } = aiChooseAction();
+    document.getElementById("offenseStyle").value = style;
+
+    undoState = JSON.parse(JSON.stringify(state));
+    executePlay(action, style);
+
+    const after = state.game;
+    aiRunning = false;
+
+    if (!after || after.over) {
+      renderGame();
+      return;
+    }
+    if (after.offense === state.playerSide) {
+      renderGame();
+      saveGame();
+    } else {
+      renderGame();
+      saveGame();
+      maybeRunAI();
+    }
+  }, 900);
+}
+
+function checkWinner() {
+  const g = state.game;
+  if (g.blue>=21 || g.orange>=21) {
+    g.over = true;
+    const winner = g.blue>=21 ? "蓝队" : "橙队";
+    addLog(`比赛结束！${winner}获胜，最终比分 ${g.blue}:${g.orange}。`);
+    state.lastGame = {
+      blue:g.blue,
+      orange:g.orange,
+      winner,
+      endedAt:new Date().toISOString(),
+      teams:JSON.parse(JSON.stringify(state.teams))
+    };
+    persist();
+    showResult();
+  }
+}
+
+function showResult() {
+  clearTimeout(aiTimer);
+  aiRunning = false;
+  document.getElementById("setupScreen").classList.add("hidden");
+  document.getElementById("gameScreen").classList.add("hidden");
+  document.getElementById("resultScreen").classList.remove("hidden");
+  const g = state.game;
+  const winner = g.blue>=21 ? "蓝队" : "橙队";
+  const playerWon = (winner === "蓝队" && state.playerSide === 0) ||
+                    (winner === "橙队" && state.playerSide === 1);
+  document.getElementById("resultText").innerHTML =
+    `<p style="font-size:25px;font-weight:900">${winner}获胜！</p>`+
+    `<p style="font-size:17px">${playerWon ? "🎉 你赢了！" : "😅 你输了，再打一场？"}</p>`+
+    `<p>最终比分：<b>${g.blue} : ${g.orange}</b></p>`+
+    `<p class="muted">比赛记录已自动保存。你可以再打一场，或者返回选人界面。</p>`;
+  persist();
+}
+
+function undoLast() {
+  if (!undoState) {
+    alert("目前没有可以撤销的回合。");
+    return;
+  }
+  clearTimeout(aiTimer);
+  aiRunning = false;
+  state = undoState;
+  undoState = null;
+  if (state.game.over) showResult();
+  else showGame();
+  persist();
+}
+
+function newMatch() {
+  clearTimeout(aiTimer);
+  aiRunning = false;
+  state.game = null;
+  state.logs = [];
+  state.teams = [[],[]];
+  state.selected = [];
+  undoState = null;
+  saveGame();
+  backToSetup();
+}
+
+function showSaveTools() {
+  document.getElementById("saveTools").classList.toggle("hidden");
+}
+
+function exportSave() {
+  const text = JSON.stringify(state);
+  const area = document.getElementById("saveText");
+  area.value = text;
+  area.focus();
+  area.select();
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text)
+        .then(() => alert("存档已生成并复制。你可以把它发送给自己，再在另一台设备导入。"))
+        .catch(() => alert("存档已生成并选中，请手动复制文本。"));
+    } else {
+      alert("存档已生成并选中，请手动复制文本。");
+    }
+  } catch(e) {
+    alert("存档已生成并选中，请手动复制文本。");
+  }
+}
+
+function importSave() {
+  const text = document.getElementById("saveText").value.trim();
+  if (!text) {
+    alert("请先在文本框粘贴存档内容。");
+    return;
+  }
+  try {
+    const parsed = JSON.parse(text);
+    if (!parsed || !parsed.teams || !Array.isArray(parsed.logs)) {
+      throw new Error("格式不正确");
+    }
+    if (!confirm("导入后会覆盖当前设备的存档，确定继续吗？")) return;
+    state = {...structuredClone(defaults),...parsed};
+    if (!Array.isArray(state.teams) || state.teams.length!==2) state.teams = [[],[]];
+    if (state.playerSide !== 0 && state.playerSide !== 1) state.playerSide = 0;
+    syncSelected();
+    undoState = null;
+    persist();
+    renderRoster();
+    renderPreview();
+    renderSidePicker();
+    if (state.game) {
+      if (state.game.over) showResult();
+      else showGame();
+    } else {
+      backToSetup();
+    }
+    alert("存档导入成功。");
+  } catch(e) {
+    alert("无法识别该存档，请检查是否完整复制。");
+  }
+}
+
+function resetEverything() {
+  if (!confirm("确定清除本设备的全部游戏数据吗？此操作无法撤销。建议先导出存档。")) {
+    return;
+  }
+  clearTimeout(aiTimer);
+  aiRunning = false;
+  localStorage.removeItem(STORAGE_KEY);
+  state = structuredClone(defaults);
+  undoState = null;
+  document.getElementById("saveText").value = "";
+  backToSetup();
+  persist();
+}
+
+function init() {
+  renderRoster();
+  renderPreview();
+  renderSidePicker();
+  if (state.game) {
+    if (state.game.over) showResult();
+    else backToSetup();
+  }
+}
+
+window.addEventListener("pagehide", persist);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState==="hidden") persist();
+});
+
+init();
+</script>
+</body>
+</html>
